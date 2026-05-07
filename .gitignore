@@ -1,0 +1,70 @@
+# Session protocol
+.session-log
+
+# OS / IDE
+Thumbs.db
+Desktop.ini
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+
+# Python (if any tooling lives here)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.env
+
+# Logs and temp
+*.log
+*.tmp
+
+# BIOS BINARIES (do not commit)
+# ----------------------------------------
+# Original and modded BIOS files are copyrighted (Gigabyte) or community
+# work hosted on Win-Raid. We do not redistribute them. Local copies live
+# in bios/original/ and bios/modded/ and stay out of git. The two-line
+# pattern below ignores everything inside those dirs (including nested
+# subdirectories from extracted archives) and then re-includes only the
+# explicit allowlist of metadata files.
+bios/original/**
+bios/modded/**
+!bios/original/.gitkeep
+!bios/original/README.md
+!bios/original/**/*.notes.md
+!bios/modded/.gitkeep
+!bios/modded/README.md
+!bios/modded/**/*.notes.md
+
+# Common BIOS extensions, ANYWHERE in the repo (defensive belt + suspenders).
+# These should never be committed even if someone drops one outside bios/.
+*.rom
+*.bin
+*.cap
+*.fd
+*.FD
+*.iso
+# Gigabyte uses bare numeric / single-letter suffixes (e.g. *.FC, *.F1, *.F2g)
+*.[Ff][0-9]
+*.[Ff][0-9][a-zA-Z]
+*.[Ff][0-9][0-9]
+*.[Ff][0-9][0-9][a-zA-Z]
+# AMI module files
+*.ffs
+# Archives that commonly contain BIOS payloads
+*.rar
+*.7z
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+
+# AMI MMTool and UEFITool binaries (download yourself per their licensing
+# terms; do not commit)
+tools/MMTool*
+tools/mmtool*
+tools/UEFITool*
+tools/uefitool*
