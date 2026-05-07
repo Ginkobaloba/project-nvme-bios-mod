@@ -150,20 +150,41 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host $ghCheck
 
 # ----- 6. create remote and push -----------------------------------------
+#
+# Note on PowerShell + native commands + $ErrorActionPreference='Stop':
+# When `gh repo view` returns a non-zero exit (which is the normal "repo
+# does not exist yet" path), PowerShell's strict ErrorAction can treat
+# the native stderr as a terminating error and bail before we reach the
+# `else` branch. We swallow it explicitly here to keep the flow.
 
-Write-Step "Creating GitHub repo $RepoOwner/$RepoName (public)"
-$existing = gh repo view "$RepoOwner/$RepoName" 2>$null
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "Repo already exists. Linking existing remote." -ForegroundColor Yellow
+Write-Step "Checking whether $RepoOwner/$RepoName already exists"
+
+$prevEAP = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+$null = & gh repo view "$RepoOwner/$RepoName" 2>&1
+$repoExists = ($LASTEXITCODE -eq 0)
+$ErrorActionPreference = $prevEAP
+
+if ($repoExists) {
+    Write-Host "Repo already exists at github.com/$RepoOwner/$RepoName. Linking existing remote." -ForegroundColor Yellow
     $remoteUrl = "https://github.com/$RepoOwner/$RepoName.git"
     git remote remove origin 2>$null
     git remote add origin $remoteUrl
 } else {
+    Write-Step "Creating GitHub repo $RepoOwner/$RepoName (public)"
     gh repo create "$RepoOwner/$RepoName" --public --source=. --remote=origin --description "Adding NVMe boot support to a Gigabyte GA-970A-D3P Rev 2.0 motherboard. Project scaffold, decision records, and runbooks."
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "gh repo create failed (exit $LASTEXITCODE). Inspect the message above and re-run, or finish manually with: gh repo create $RepoOwner/$RepoName --public --source=. --remote=origin ; git push -u origin main"
+        exit 1
+    }
 }
 
 Write-Step "git push -u origin main"
 git push -u origin main
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "git push failed (exit $LASTEXITCODE)."
+    exit 1
+}
 
 Write-Host ""
 Write-Host "Done." -ForegroundColor Green
