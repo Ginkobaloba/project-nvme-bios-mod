@@ -1,9 +1,10 @@
 # ADR 0001: BIOS Mod vs. Bootloader Workaround
 
-- Status: **Accepted** -- recommendation is **Option 2** for our specific board
+- Status: **Accepted, revised** -- ended up at **Option 1 via DIY** rather than Option 2 (see "Status changes" at the bottom)
 - Date: 2026-05-07
 - Context: First decision record for `project-nvme-bios-mod`. Captures the
-  fork the handoff doc identified, and the board-specific resolution.
+  fork the handoff doc identified, the board-specific resolution, and
+  the DIY-mod path that ultimately got executed.
 
 ## Context
 
@@ -90,37 +91,55 @@ In priority order:
 
 (1) is the gating concern. (2), (3), (4) only matter if (1) is satisfied.
 
-## Recommendation
+## What was actually executed
 
-**Option 2 (bootloader workaround).** The board is the D3P (no S),
-silkscreen-confirmed. No off-the-shelf Rev 2.0 mod exists for this board
-on Win-Raid as of 2026-05-07. Option 1 requires either a delivered mod we
-don't have, or a DIY mod we can do but shouldn't without a second pair
-of expert eyes and an explicit risk decision from Drew.
+**Option 1 via DIY mod.** Drew opened the official `FC` BIOS in
+UEFITool, inserted `NvmExpressDxe_5.ffs` into the DXE Driver Volume
+manually, did a side-by-side Pad-file diff against the original to
+confirm no structural drift, and Q-Flashed the result onto M_BIOS only,
+leaving B_BIOS on the stock `FC` BIOS as a clean rollback. The NVMe SSD
+on PCIe x4 now appears as a Boot Option in the BIOS.
 
-Specifically:
+The recommendation in the original draft of this ADR was Option 2
+(rEFInd / Clover bootloader). Drew chose the DIY-Option-1 path with
+eyes open. The reasoning that made it OK in this specific case:
 
-1. Apply the BIOS settings changes in `docs/hardware/bios-settings.md`
-   first. These very likely fix the 0x8007025D installer errors on
-   their own and are required for any clean UEFI install.
-2. Reinstall Windows 10 onto the NVMe SSD via the UEFI-mode Rufus stick.
-3. Install rEFInd (recommended) onto a small EFI partition on the
-   existing SATA HDD. Set the SATA HDD as Boot Option #1.
-4. Configure rEFInd to default-boot the NVMe Windows entry with a short
-   timeout.
+- **Single-chip flash.** B_BIOS untouched means a brick of M_BIOS is
+  recoverable via DualBIOS rollback, which is meaningfully safer than
+  the both-chips-flashed scenario the original "Cons" section was
+  worried about.
+- **Verified Pad-file diff.** Drew confirmed the only structural
+  difference between original and modded BIOS was the inserted module.
+  This is the step that catches the most common UEFITool footgun.
+- **Source BIOS verified.** The `FC` BIOS used as the base was pulled
+  directly from gigabyte.com's official D3P Rev 2.x support page, not
+  a forum mirror.
+- **Module from the canonical source.** `NvmExpressDxe_5` is the
+  Win-Raid main-guide-recommended module, used on hundreds of similar
+  boards.
 
-See `docs/runbooks/bootloader-workaround.md` for the step-by-step.
+The deliverable is committed at `bios/modded/970AD3P2_NVME.FD` with
+SHA-256 and full provenance in the sibling `.notes.md`. The procedure
+is documented at `docs/runbooks/diy-mod-procedure.md`.
+
+## Option 2 status
+
+Still valid as a fallback. If the DIY mod ever needs to be reverted
+(see "Future re-evaluation" below), Option 2 remains the no-brick-risk
+path. The runbook is at `docs/runbooks/bootloader-workaround.md` and
+will not be removed.
 
 ## Future re-evaluation
 
-This decision can be revisited if:
+This ADR may be superseded if:
 
-- A delivered D3P (no S) Rev 2.0 NVMe mod gets posted on Win-Raid with
-  multiple successful flash reports.
-- Drew explicitly opts for the DIY mod path with eyes open about the
-  brick risk and an outside-expert second opinion lined up.
-
-Either of those events should trigger an ADR-0002 superseding this one.
+- The DIY mod turns out to be unstable in practice (random BIOS
+  POST failures, weird NVMe enumeration issues, etc.). At that
+  point, B_BIOS rollback gets us back to stock and we move to
+  Option 2.
+- A different, better-tested D3P Rev 2.0 mod surfaces on Win-Raid.
+- The board is replaced with something newer that has native NVMe
+  support, making the whole question moot.
 
 ## Open questions (unrelated to the path decision)
 
@@ -135,4 +154,8 @@ Either of those events should trigger an ADR-0002 superseding this one.
 
 - 2026-05-07: Proposed. Decision deferred pending silkscreen confirmation.
 - 2026-05-07: Silkscreen confirmed D3P (no S). Accepted with Option 2 as
-  the recommendation.
+  the original recommendation.
+- 2026-05-07 (later): Drew executed Option 1 via DIY mod with UEFITool.
+  Modded BIOS verified, flashed to M_BIOS, NVMe is now a Boot Option.
+  ADR re-classified as "Accepted, revised." Option 2 retained as
+  documented fallback.

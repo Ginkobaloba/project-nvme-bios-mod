@@ -42,9 +42,16 @@ can be revisited.
 2. Never download a BIOS file from a forum link directly. Surface the link
    to the user, let the user download it. The user verifies the source and
    moves the file to `bios/original/` or wherever, themselves.
-3. Never commit BIOS binaries (`.bin`, `.cap`, `.rom`, `.fd`, `.f*` numeric
-   suffixes from Gigabyte) to git. The `.gitignore` enforces this. If you
-   see a BIOS binary committed, that is a bug, surface it.
+3. **BIOS binaries are gitignored by default. Exceptions are explicit.**
+   The `.gitignore` allows exactly the project's own DIY-modded
+   deliverable (`bios/modded/970AD3P2_NVME.FD`), and that file has a
+   sibling `*.notes.md` documenting provenance, SHA-256, and warnings.
+   Adding a new exception requires:
+     a) An explicit re-include line in `.gitignore`
+     b) A sibling `*.notes.md` with provenance and SHA-256
+     c) An updated handoff explaining why
+   If you see a BIOS binary in tree without all three, that is a bug,
+   surface it.
 4. Never recommend bypassing DualBIOS recovery instructions. If a flash
    fails, the M_BIOS / B_BIOS recovery flow exists and should be used.
 5. Multi-agent cross-validation is the default for any claim about which
