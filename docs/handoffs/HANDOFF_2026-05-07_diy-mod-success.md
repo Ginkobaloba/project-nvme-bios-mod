@@ -11,17 +11,24 @@ The big day. The DIY mod worked.
   This is the actual confirmation that the mod did what it was
   supposed to do. Pre-install state, no Windows on the NVMe yet, but
   the BIOS is enumerating it as bootable.
-- **Committed the modded BIOS as a project deliverable.** Filename:
+- **Produced the modded BIOS as a project deliverable.** Filename:
   `bios/modded/970AD3P2_NVME.FD`, SHA-256:
   `1dc2f8386b974ba1f3469215f0ec78381a8dcfc6d5c370d6074abd55b74483da`,
   4 MiB. Sibling `.notes.md` captures source BIOS, tool, module, and
   warnings.
+  > **Correction, 2026-09-25.** This bullet originally read "Committed
+  > the modded BIOS". The binary was never committed: `git rev-list
+  > --all --objects` finds zero blobs at that path in the entire
+  > history, on any branch. The image is held locally and not
+  > redistributed, pending a decision about publishing a derivative of
+  > Gigabyte's firmware. Only the `.notes.md` is in the repository. The
+  > rest of this handoff is unchanged.
 - **Updated docs to match reality:**
   - `docs/runbooks/diy-mod-procedure.md` -- new runbook based on
     what Drew actually did, not generic Win-Raid steps.
   - `docs/runbooks/bios-mod-procedure.md` is unchanged but now
-    applies cleanly to anyone who wants to flash the committed
-    BIOS without re-deriving the mod.
+    applies cleanly to anyone who has built the image themselves and
+    wants to flash it.
   - `docs/adr/0001-bios-mod-vs-bootloader-workaround.md` reclassified
     as "Accepted, revised" with the DIY-Option-1 rationale captured.
   - `README.md` reframed as community-facing: "if you have this
