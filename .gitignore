@@ -22,14 +22,13 @@ venv/
 *.log
 *.tmp
 
-# BIOS BINARIES (do not commit)
+# BIOS BINARIES (do not commit BY DEFAULT, with explicit exceptions)
 # ----------------------------------------
-# Original and modded BIOS files are copyrighted (Gigabyte) or community
-# work hosted on Win-Raid. We do not redistribute them. Local copies live
-# in bios/original/ and bios/modded/ and stay out of git. The two-line
-# pattern below ignores everything inside those dirs (including nested
-# subdirectories from extracted archives) and then re-includes only the
-# explicit allowlist of metadata files.
+# Most BIOS files in this repo would be either copyrighted Gigabyte
+# originals or third-party community mods. We do not redistribute those.
+# The exception is the project's own DIY-modded deliverable, which is
+# the whole point of the repo and is committed deliberately. See the
+# explicit re-include at the bottom of this file.
 bios/original/**
 bios/modded/**
 !bios/original/.gitkeep
@@ -39,14 +38,15 @@ bios/modded/**
 !bios/modded/README.md
 !bios/modded/**/*.notes.md
 
-# Common BIOS extensions, ANYWHERE in the repo (defensive belt + suspenders).
-# These should never be committed even if someone drops one outside bios/.
+# Common BIOS extensions and adjacent binaries, ANYWHERE in the repo.
+# Defensive belt + suspenders: even if someone drops one outside bios/.
 *.rom
 *.bin
 *.cap
 *.fd
 *.FD
 *.iso
+*.efi
 # Gigabyte uses bare numeric / single-letter suffixes (e.g. *.FC, *.F1, *.F2g)
 *.[Ff][0-9]
 *.[Ff][0-9][a-zA-Z]
@@ -61,6 +61,21 @@ bios/modded/**
 *.tar
 *.tar.gz
 *.tgz
+# Tool binaries (Gigabyte Efiflash.exe, autoexec.bat, UEFITool.exe, etc.).
+# We do not redistribute third-party tooling. Source URLs are documented
+# in tools/README.md so each user downloads their own copy.
+*.exe
+*.bat
+*.dll
+*.sys
+*.cmd
+*.msi
+*.com
+# DOS/UEFI shell helpers that come bundled with Gigabyte BIOS downloads
+Efiflash*
+EFIFlash*
+autoexec*
+AUTOEXEC*
 
 # AMI MMTool and UEFITool binaries (download yourself per their licensing
 # terms; do not commit)
@@ -68,3 +83,12 @@ tools/MMTool*
 tools/mmtool*
 tools/UEFITool*
 tools/uefitool*
+
+# Explicit re-includes (must come AFTER all global *.FD / *.fd / etc rules)
+# ----------------------------------------
+# The DIY-modded deliverable (bios/modded/970AD3P2_NVME.FD) stays LOCAL for
+# now: it is a modified Gigabyte image and redistribution rights are not yet
+# settled. Its source BIOS, tool, module, SHA-256 and the wrong-board warnings
+# are documented in bios/modded/970AD3P2_NVME.FD.notes.md. Re-include it here
+# only after the licensing question is answered:
+# !bios/modded/970AD3P2_NVME.FD

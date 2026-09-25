@@ -1,87 +1,119 @@
 # project-nvme-bios-mod
 
-Adding NVMe boot support to motherboards that shipped before NVMe was a thing.
-Specifically: AMI Aptio UEFI boards where the original BIOS doesn't know how to
-boot from an NVMe SSD on a PCIe x4 adapter, and we want to fix that.
+NVMe-modded BIOS and procedure for the **Gigabyte GA-970A-D3P (no S),
+Revision 2.0** motherboard. Adds NVMe boot support to a board that
+shipped before NVMe was a thing, so you can use a PCIe x4 NVMe adapter
+as your boot drive on AM3+ hardware that would otherwise be
+landfill-bound.
 
-The first target is a **Gigabyte GA-970A series board, Revision 2.0**, AM3+,
-AMD 970 chipset, BIOS version FC dated 2015-06-01. There is an open question
-on the exact submodel (D3P vs DS3P) that has to be resolved before any flashing
-happens. See `docs/hardware/target-system.md` and
-`docs/adr/0001-bios-mod-vs-bootloader-workaround.md`.
+## If you are here because you have the same board
+
+You probably want one of two things:
+
+1. **The pre-built modded BIOS.**
+   - File: [`bios/modded/970AD3P2_NVME.FD`](bios/modded/970AD3P2_NVME.FD)
+   - SHA-256: `1dc2f8386b974ba1f3469215f0ec78381a8dcfc6d5c370d6074abd55b74483da`
+   - Provenance, source BIOS, tool, module, and warnings:
+     [`bios/modded/970AD3P2_NVME.FD.notes.md`](bios/modded/970AD3P2_NVME.FD.notes.md)
+   - Flash procedure (verifies hash, checks Pad-files, flashes one
+     chip, leaves DualBIOS backup intact):
+     [`docs/runbooks/bios-mod-procedure.md`](docs/runbooks/bios-mod-procedure.md)
+
+2. **The recipe to build it yourself.**
+   The full DIY runbook is at
+   [`docs/runbooks/diy-mod-procedure.md`](docs/runbooks/diy-mod-procedure.md).
+   It walks the actual UEFITool steps, the Pad-file diff that is the
+   real safety check, and the single-chip flash strategy.
+
+**Read this before flashing anything.** The provenance file lists the
+boards this BIOS is **not** for. The letter difference between
+`GA-970A-D3P` and `GA-970A-DS3P` matters. Confirm your silkscreen.
 
 ## Status
 
-Pre-flight. No flashing has happened. The repo is currently:
+- BIOS modded and flashed: 2026-05-07
+- NVMe SSD on PCIe x4 adapter recognized as Boot Option: confirmed
+- Windows 10 install on the NVMe: in progress
+- DualBIOS B_BIOS chip: still on stock FC for rollback safety
 
-- Hardware spec captured
-- BIOS settings to change captured
-- Two-path decision (mod the BIOS, or chainload from a SATA bootloader)
-  documented
-- Critical open question about board submodel flagged
+See `docs/handoffs/` for the per-session log of how we got here. Sort
+by date desc.
 
-## What this repo is for
+## What this repo is
 
 Three audiences in one repo:
 
-1. **Drew working on Mark's PC.** Make the actual install work, without
-   bricking the board. Every step has to be reproducible across sessions on
-   different machines (4090 desktop, 4070 Super, Legion Go).
-2. **Anyone else with the same Gigabyte 970-series board.** Worked example of
-   the BIOS-mod path and the bootloader-workaround path, with the gotchas
-   documented from real attempts rather than generic forum hearsay.
-3. **Portfolio.** A concrete example of how to triangulate niche
-   hardware-modding info, document tradeoffs honestly, and build a
-   reversible-by-default workflow around an irreversible-by-default operation.
+1. **The next person with this board.** A vetted BIOS plus a
+   reproducible recipe, written from a real attempt rather than
+   rephrased forum posts.
+2. **Drew working on this build.** Reproducible workflow across the
+   4090 desktop, 4070 Super, and Legion Go, via the standard
+   `C:\dev\` session protocol.
+3. **Portfolio.** A worked example of how to triangulate niche
+   hardware-modding info, document tradeoffs, and build a
+   reversible-by-default workflow around an irreversible-by-default
+   operation.
 
-## What this repo is NOT for
+## What this repo is NOT
 
-- It is not a place to host copyrighted Gigabyte BIOS binaries or the Win-Raid
-  community's modded BIOS files. Those stay on the source forums. We commit
-  metadata, scripts, and documentation. See `bios/README.md`.
-- It is not a generic "how to mod any BIOS" guide. The Win-Raid guide already
-  exists for that. We point at it, don't replace it.
-- It is not a guarantee. BIOS flashing can brick hardware. DualBIOS helps, but
-  is not a free pass.
+- It is not a generic "how to mod any BIOS" guide. The Win-Raid main
+  guide already exists and is canonical:
+  <https://winraid.level1techs.com/t/howto-get-full-nvme-support-for-all-systems-with-an-ami-uefi-bios/30901>.
+  We point at it, we don't replace it.
+- It is not a guarantee. BIOS flashing can brick hardware. DualBIOS
+  helps. It is not a free pass. Read
+  [`docs/adr/0001-bios-mod-vs-bootloader-workaround.md`](docs/adr/0001-bios-mod-vs-bootloader-workaround.md)
+  for the tradeoffs we considered, including the lower-risk fallback.
+- It is not for the GA-970A-DS3P, GA-970A-UD3P, GA-970A-D3, or any
+  other board. Use of the modded BIOS file on a different board is
+  a likely brick.
 
 ## Repo layout
 
 ```
 project-nvme-bios-mod/
-  README.md                           you are here
-  CLAUDE.md                           project-local AI instructions
-  LICENSE                             MIT
-  .gitignore                          excludes BIOS binaries and session log
+  README.md                              you are here
+  CLAUDE.md                              project-local AI instructions
+  LICENSE                                MIT (covers original content)
+  .gitignore                             excludes BIOS by default, with one exception
   bios/
-    original/                         original Gigabyte BIOS (gitignored, see README)
-    modded/                           modded BIOSes (gitignored, see README)
-    README.md                         what goes here, why we don't commit binaries
+    original/                            originals (gitignored, see README)
+    modded/
+      970AD3P2_NVME.FD                   the deliverable -- THE actual modded BIOS
+      970AD3P2_NVME.FD.notes.md          provenance, SHA-256, hard warnings
+      NEAR-MISS-2026-05-07.notes.md      project history, kept as a teaching example
+      README.md                          how this directory works
   modules/
-    README.md                         where the NvmExpressDxe ffs files go
-  scripts/                            session and verification scripts
+    README.md                            where NvmExpressDxe ffs files go (local-only)
+  scripts/
+    bootstrap-repo.ps1                   one-shot git init + commit + push
     README.md
-  tools/                              checksums, links to MMTool, UEFITool
-    README.md
+  tools/
+    README.md                            references to UEFITool / MMTool
   docs/
     adr/
       0001-bios-mod-vs-bootloader-workaround.md
     handoffs/
-      template.md                     seed for new handoff docs
-      HANDOFF_2026-05-07_*.md         per-session state
+      template.md
+      HANDOFF_2026-05-07_*.md            session-by-session state
     hardware/
-      target-system.md                Mark's PC hardware spec
-      bios-settings.md                the settings to flip before flashing
+      target-system.md                   board, CPU, RAM, PSU, NVMe model
+      bios-settings.md                   the settings to flip in BIOS
     runbooks/
-      bios-mod-procedure.md           Option 1 if confirmed Rev 2.0 mod exists
-      bootloader-workaround.md        Option 2 fallback (Clover or rEFInd)
+      bios-mod-procedure.md              flash a pre-built mod (covers our deliverable)
+      diy-mod-procedure.md               build the mod yourself with UEFITool
+      bootloader-workaround.md           lower-risk fallback (rEFInd / Clover)
 ```
 
 ## Quick links
 
-- The decision record: [`docs/adr/0001-bios-mod-vs-bootloader-workaround.md`](docs/adr/0001-bios-mod-vs-bootloader-workaround.md)
-- Target system spec: [`docs/hardware/target-system.md`](docs/hardware/target-system.md)
-- BIOS settings to change first: [`docs/hardware/bios-settings.md`](docs/hardware/bios-settings.md)
-- Latest handoff: `docs/handoffs/` (sort by date desc)
+- The decision record:
+  [`docs/adr/0001-bios-mod-vs-bootloader-workaround.md`](docs/adr/0001-bios-mod-vs-bootloader-workaround.md)
+- Target system spec:
+  [`docs/hardware/target-system.md`](docs/hardware/target-system.md)
+- BIOS settings to apply before any install attempt:
+  [`docs/hardware/bios-settings.md`](docs/hardware/bios-settings.md)
+- Latest handoff: `docs/handoffs/` sorted by date desc
 
 ## Working on this repo
 
@@ -95,14 +127,18 @@ vend
 ```
 
 `vstart` and `vend` are defined in `C:\dev\_scripts\` and require the
-[device setup checklist](../DEVICE_SETUP.md) to be complete on the current
-machine. See [`C:\dev\SESSION_PROTOCOL.md`](../SESSION_PROTOCOL.md) for the
-full lifecycle.
+device setup checklist to be complete on the current machine.
 
 ## License
 
-MIT. See [LICENSE](LICENSE). Note that "MIT" applies to the original content
-in this repo (docs, scripts, schema). It does not relicense Gigabyte BIOS
-binaries, AMI MMTool, or any third-party module dropped into `modules/` or
-`bios/`. Those carry their own licenses, which is the main reason we don't
-commit them.
+MIT for the original content (docs, scripts, runbooks). See
+[LICENSE](LICENSE).
+
+The committed `970AD3P2_NVME.FD` is a derivative work built on
+Gigabyte's original `FC` BIOS plus the EDK2/Clover-derived
+`NvmExpressDxe_5` module compiled by the Win-Raid community member
+Ethaniel. The MIT terms above do not relicense those underlying
+components. Redistribution here is in the same spirit as the rest of
+the BIOS-mod community: enabling continued use of obsolete hardware
+that the OEM has stopped supporting. If you are the rights holder for
+any underlying component and want this taken down, open an issue.
