@@ -10,14 +10,22 @@ landfill-bound.
 
 You probably want one of two things:
 
-1. **The pre-built modded BIOS.**
-   - File: [`bios/modded/970AD3P2_NVME.FD`](bios/modded/970AD3P2_NVME.FD)
-   - SHA-256: `1dc2f8386b974ba1f3469215f0ec78381a8dcfc6d5c370d6074abd55b74483da`
+1. **The pre-built modded BIOS. It is NOT in this repository.**
+   The binary is held locally and deliberately not committed, pending a
+   decision about redistributing a derivative of Gigabyte's firmware. What
+   is here is everything needed to rebuild it and confirm you got the same
+   file:
+   - Expected SHA-256 of the result:
+     `1dc2f8386b974ba1f3469215f0ec78381a8dcfc6d5c370d6074abd55b74483da`
    - Provenance, source BIOS, tool, module, and warnings:
      [`bios/modded/970AD3P2_NVME.FD.notes.md`](bios/modded/970AD3P2_NVME.FD.notes.md)
    - Flash procedure (verifies hash, checks Pad-files, flashes one
      chip, leaves DualBIOS backup intact):
      [`docs/runbooks/bios-mod-procedure.md`](docs/runbooks/bios-mod-procedure.md)
+
+   Build it with option 2 below, then check your output against that hash.
+   If it matches, you have a byte-identical copy of the image that was
+   flashed and verified on the board described here.
 
 2. **The recipe to build it yourself.**
    The full DIY runbook is at
@@ -75,12 +83,12 @@ project-nvme-bios-mod/
   README.md                              you are here
   CLAUDE.md                              project-local AI instructions
   LICENSE                                MIT (covers original content)
-  .gitignore                             excludes BIOS by default, with one exception
+  .gitignore                             excludes every BIOS binary
   bios/
     original/                            originals (gitignored, see README)
     modded/
-      970AD3P2_NVME.FD                   the deliverable -- THE actual modded BIOS
       970AD3P2_NVME.FD.notes.md          provenance, SHA-256, hard warnings
+                                         (the .FD itself is NOT committed)
       NEAR-MISS-2026-05-07.notes.md      project history, kept as a teaching example
       README.md                          how this directory works
   modules/
@@ -134,11 +142,14 @@ device setup checklist to be complete on the current machine.
 MIT for the original content (docs, scripts, runbooks). See
 [LICENSE](LICENSE).
 
-The committed `970AD3P2_NVME.FD` is a derivative work built on
-Gigabyte's original `FC` BIOS plus the EDK2/Clover-derived
-`NvmExpressDxe_5` module compiled by the Win-Raid community member
-Ethaniel. The MIT terms above do not relicense those underlying
-components. Redistribution here is in the same spirit as the rest of
-the BIOS-mod community: enabling continued use of obsolete hardware
+`970AD3P2_NVME.FD` is NOT distributed here, and that is why. It is a
+derivative work built on Gigabyte's original `FC` BIOS plus the
+EDK2/Clover-derived `NvmExpressDxe_5` module compiled by the Win-Raid
+community member Ethaniel. The MIT terms above cover this repository's
+own content and do not relicense those underlying components, so
+redistributing the image is a separate decision that has not been made.
+The recipe, the hash and the provenance notes are published instead, in
+the same spirit as the rest of the BIOS-mod community: enabling
+continued use of obsolete hardware
 that the OEM has stopped supporting. If you are the rights holder for
 any underlying component and want this taken down, open an issue.

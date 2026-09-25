@@ -26,9 +26,11 @@ venv/
 # ----------------------------------------
 # Most BIOS files in this repo would be either copyrighted Gigabyte
 # originals or third-party community mods. We do not redistribute those.
-# The exception is the project's own DIY-modded deliverable, which is
-# the whole point of the repo and is committed deliberately. See the
-# explicit re-include at the bottom of this file.
+# The project's own DIY-modded image is ALSO not committed: it is a
+# derivative of Gigabyte's firmware and redistributing it is a decision
+# that has not been made. There is deliberately NO re-include for it
+# below. Only .gitkeep, README.md and *.notes.md are re-included, so the
+# provenance notes and the SHA-256 are published while the binary is not.
 bios/original/**
 bios/modded/**
 !bios/original/.gitkeep
